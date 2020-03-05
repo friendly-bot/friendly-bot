@@ -1,0 +1,52 @@
+app:
+  # Acceptable values: panic, fatal, error, warn, warning, info, debug, trace
+  log_level: "debug"
+  graceful_shutdown_timeout: 10s
+
+  # Timezone to use for cronjob (default: UTC)
+  timezone: "UTC"
+
+bot:
+  slack:
+    token: "xoxb-"
+    # Display all requests send/receive to/from Slack API/RTM
+    debug: false
+    http:
+      timeout: 5s
+
+  cache:
+    # Acceptable values: in_memory, redis
+    type: "in_memory"
+    configuration:
+      # Redis Configuration
+      flush_on_start: false
+      addr: "127.0.0.1:6379"
+      password: ""
+      timeout:
+        dial: 10s
+        read: 10s
+        write: 10s
+
+  plugin:
+    event:
+      # CronJob plugin
+      cronjob:
+        ping:
+          path: "./plugins/ping.so"
+          schedule: "* * * * *" # each minutes
+          configuration:
+            message: "ping"
+
+         # plugin_name
+           # path: "/path/to/plugin.so"
+           # schedule: "* * * * *" # https://en.wikipedia.org/wiki/Cron
+           # disable: true # turn off the plugin
+           # configuration:
+             # custom yaml to inject in plugin
+
+      # Trigger on new message
+      on_message:
+        echo:
+          disable: true
+          path: "../plugins/echo/echo.so"
+          configuration: {}
