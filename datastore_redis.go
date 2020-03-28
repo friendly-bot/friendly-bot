@@ -24,7 +24,7 @@ func NewRedisCache(cfg *viper.Viper, l logrus.FieldLogger) (GlobalDataStore, err
 		logger: l,
 		redis: redis.NewClient(&redis.Options{
 			Addr:         cfg.GetString("addr"),
-			Password:     cfg.GetString("addr"),
+			Password:     cfg.GetString("password"),
 			DialTimeout:  cfg.GetDuration("timeout.dial"),
 			ReadTimeout:  cfg.GetDuration("timeout.read"),
 			WriteTimeout: cfg.GetDuration("timeout.write"),
