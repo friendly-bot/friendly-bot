@@ -86,7 +86,10 @@ func (b *Bot) broadcast(e slack.RTMEvent) {
 
 	case *slack.MessageEvent:
 		for name, plg := range b.plugins.onMessage {
-			if err := plg.OnMessage(ev, b.newContext(name)); err != nil {
+
+			f := func() error { return plg.OnMessage(ev, b.newContext(name)) }
+
+			if err := sandbox(f); err != nil {
 				b.logger.WithField("plugin_name", name).Error(err)
 			}
 		}
