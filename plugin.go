@@ -131,11 +131,12 @@ func (b *Bot) loadPluginsCronjob() error {
 		}
 
 		_, err = b.plugins.cron.AddFunc(cfg.Schedule, b.wrapJob(name, job))
-
 		if err != nil {
 			logger.WithField("context", "add_func").Error(err)
 			continue
 		}
+
+		logger.Info("plugin loaded")
 	}
 
 	return nil
