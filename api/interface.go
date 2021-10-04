@@ -19,6 +19,11 @@ type (
 		OnMessage(*slack.MessageEvent, Context) error
 	}
 
+	NewOnReactionAdded = func(viper2 *viper.Viper) (OnReactionAdded, error)
+	OnReactionAdded interface {
+		OnReactionAdded(*slack.ReactionAddedEvent, Context) error
+	}
+
 	NewJob = func(*viper.Viper) (Runner, error)
 	Runner interface {
 		Run(Context) error

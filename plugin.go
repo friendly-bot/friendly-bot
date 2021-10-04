@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	NewOnMessage = "NewOnMessage"
-	NewJob       = "NewJob"
+	NewOnMessage  = "NewOnMessage"
+	ReactionAdded = "NewReactionAdded"
+	NewJob        = "NewJob"
 )
 
 type (
@@ -20,6 +21,7 @@ type (
 		cron *cron.Cron
 
 		onMessage map[string]api.OnMessage
+		onReactionAdded map[string]api.OnReactionAdded
 	}
 
 	PluginConfiguration struct {
@@ -37,6 +39,10 @@ func (b *Bot) loadPluginStore() error {
 	b.logger.WithField("context", "init").Info("plugin_store")
 
 	if err := b.loadPluginsOnMessage(); err != nil {
+		return err
+	}
+
+	if err := b.loadPluginsOnReactionAdded(); err != nil {
 		return err
 	}
 
@@ -84,6 +90,48 @@ func (b *Bot) loadPluginsOnMessage() error {
 		}
 
 		b.plugins.onMessage[name] = onMessage
+	}
+
+	return nil
+}
+
+func (b *Bot) loadPluginsOnReactionAdded() error {
+	b.logger.WithField("context", "init").Info("plugin on_reaction")
+	b.plugins.onReactionAdded = make(map[string]api.OnReactionAdded)
+
+	var cfgs map[string]PluginConfiguration
+
+	if err := b.config.UnmarshalKey("bot.plugin.event.on_reaction_added", &cfgs); err != nil {
+		return fmt.Errorf("can't unmarshal 'bot.plugin.event.on_reaction_added': %w", err)
+	}
+
+	for name, cfg := range cfgs {
+		if cfg.Disable {
+			continue
+		}
+
+		logger := b.logger.WithFields(logrus.Fields{"path": cfg.Path, "name": name})
+		logger.Info("load plugin")
+
+		sym, err := lookup(ReactionAdded, cfg)
+		if err != nil {
+			logger.WithField("context", "lookup").Error(err)
+			continue
+		}
+
+		n, ok := sym.(api.NewOnReactionAdded)
+		if !ok {
+			logger.WithField("context", "assertion").Error("can't cast to 'api.OnReactionAdded'")
+			continue
+		}
+
+		onReactionAdded, err := n(b.config.Sub(fmt.Sprintf("bot.plugin.event.on_reaction_added.%s.configuration", name)))
+		if err != nil {
+			logger.WithField("context", "new").Error(err)
+			continue
+		}
+
+		b.plugins.onReactionAdded[name] = onReactionAdded
 	}
 
 	return nil
