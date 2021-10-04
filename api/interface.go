@@ -19,7 +19,7 @@ type (
 		OnMessage(*slack.MessageEvent, Context) error
 	}
 
-	NewOnReactionAdded = func(viper2 *viper.Viper) (OnReactionAdded, error)
+	NewOnReactionAdded = func(*viper.Viper) (OnReactionAdded, error)
 	OnReactionAdded interface {
 		OnReactionAdded(*slack.ReactionAddedEvent, Context) error
 	}
